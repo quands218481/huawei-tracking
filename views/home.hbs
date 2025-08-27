@@ -1,0 +1,484 @@
+{{!-- views/top-charts.hbs --}}
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <title>{{pageTitle}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root {
+            --bg: #0b0d12;
+            --card: #111520;
+            --muted: #94a3b8;
+            --text: #e6edf3;
+            --line: #1f2633;
+            --brand: #3b82f6;
+            --ok: #22c55e;
+            --err: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none
+        }
+
+        .wrap {
+            max-width: 1200px;
+            margin: 24px auto;
+            padding: 0 16px
+        }
+
+        h1 {
+            margin: 0 0 12px
+        }
+
+        /* 🔧 tăng thêm 1 cột cho nút Thêm app */
+        .toolbar {
+            display: grid;
+            grid-template-columns: 1fr 1fr 120px 120px;
+            gap: 12px;
+            align-items: center;
+            margin: 8px 0 12px;
+        }
+
+        .select,
+        button,
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--line);
+            background: #0f1420;
+            color: var(--text);
+            outline: none
+        }
+
+        button {
+            background: var(--brand);
+            border: 0;
+            font-weight: 600;
+            cursor: pointer
+        }
+
+        .btn-secondary {
+            background: #0f1420
+        }
+
+        .btn-ok {
+            background: var(--ok)
+        }
+
+        .btn-err {
+            background: var(--err)
+        }
+
+        .add-panel {
+            display: none;
+            padding: 12px;
+            border: 1px solid var(--line);
+            background: var(--card);
+            border-radius: 12px;
+            margin: 0 0 16px;
+        }
+
+        .add-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 120px;
+            gap: 12px;
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 6px
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px
+        }
+
+        .col {
+            min-width: 0
+        }
+
+        .col h3 {
+            margin: 0 0 8px 6px;
+            color: #c7d2fe;
+            font-weight: 600
+        }
+
+        .list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px
+        }
+
+        .card {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--line);
+            background: var(--card);
+            border-radius: 14px
+        }
+
+        .logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid var(--line);
+            background: #0b0f19
+        }
+
+        .meta {
+            min-width: 0
+        }
+
+        .name {
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .dev {
+            color: var(--muted);
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .right {
+            margin-left: auto;
+            text-align: right
+        }
+
+        .downloads {
+            font-weight: 600
+        }
+
+        .tag {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 2px 6px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            color: var(--muted);
+            font-size: 11px
+        }
+
+        .empty {
+            padding: 36px;
+            text-align: center;
+            color: var(--muted);
+            border: 1px dashed var(--line);
+            border-radius: 12px;
+            background: #0f1420
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width:1024px) {
+            .grid {
+                grid-template-columns: 1fr
+            }
+
+            .add-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .toolbar {
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1>Top Charts</h1>
+
+        {{!-- Filter bar --}}
+        <form id="filters" class="toolbar" onsubmit="return false">
+            <select class="select" name="group" id="group">
+                <option value="">All groups</option>
+                {{#each groups}}
+                <option value="{{this}}" {{#if (eq ../selectedGroup this)}}selected{{/if}}>{{this}}</option>
+                {{/each}}
+            </select>
+            <select class="select" name="category" id="category">
+                <option value="">All categories</option>
+                {{#each categories}}
+                <option value="{{this}}" {{#if (eq ../selectedCategory this)}}selected{{/if}}>{{this}}</option>
+                {{/each}}
+            </select>
+            <button type="button" id="btnClear" class="btn-secondary">Xoá lọc</button>
+            <button type="button" id="btnAdd">Thêm app</button>
+        </form>
+
+        {{!-- 🔹 Panel thêm app (ẩn/hiện bằng JS) --}}
+        <div id="addPanel" class="add-panel">
+            <div class="add-grid">
+                <input type="text" id="add_pkgName" placeholder="App pkgName com.dipingxiankeu.decision..." />
+                <div class="add-field">
+                    <label for="add_category">Category (chọn 1+)</label>
+                    <select id="add_category" multiple class="select" size="4"> {{!-- multiple ✅ --}}
+                        {{#each categories}}
+                        <option value="{{this}}" {{#if (eq ../selectedCategory this)}}selected{{/if}}>{{this}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+                <div class="add-field">
+                    <label for="add_group">Group</label>
+                    <select id="add_group" class="select">
+                        <option value="">-- Chọn group --</option>
+                        {{#each groups}}
+                        <option value="{{this}}" {{#if (eq ../selectedGroup this)}}selected{{/if}}>{{this}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+                <button type="button" id="btnAddSubmit" class="btn-ok">Gửi</button>
+            </div>
+            <div id="addMsg" class="hint"></div>
+        </div>
+
+        <div class="grid">
+            {{!-- ======================= FREE ======================= --}}
+            <section class="col">
+                <h3>Free Downloads</h3>
+                {{#if freeApps.length}}
+                <div class="list" id="list-free">
+                    {{#each freeApps}}
+                    {{#if (and
+                    (inArray this.category (or ../selectedCategory @root.selectedCategory))
+                    (or (not (or ../selectedGroup @root.selectedGroup))
+                    (eq this.group (or ../selectedGroup @root.selectedGroup)))
+                    )}}
+                    <article class="card" data-group="{{group}}" data-cats='{{{json category}}}'>
+                        <img class="logo" src="{{icon}}" alt="{{name}} logo" />
+                        <div class="meta">
+                            <div class="name" title="{{name}}">
+                                {{name}}
+                                {{#if group}}<span class="tag">{{group}}</span>{{/if}}
+                            </div>
+                            <div class="dev" title="{{developerName}}">{{developerName}}</div>
+                        </div>
+                        <div class="right">
+                            <div class="downloads">{{formatNumber downCount}}</div>
+                            {{#if downCountDesc}}<div class="dev" style="font-size:11px">{{downCountDesc}}</div>{{/if}}
+                        </div>
+                    </article>
+                    {{/if}}
+                    {{/each}}
+                </div>
+                {{else}}
+                <div class="empty" id="empty-free">Chưa có dữ liệu Free.</div>
+                {{/if}}
+            </section>
+
+            {{!-- ======================= PAID ======================= --}}
+            <section class="col">
+                <h3>Paid Downloads</h3>
+                {{#if paidApps.length}}
+                <div class="list" id="list-paid">
+                    {{#each paidApps}}
+                    {{#if (and
+                    (inArray this.category (or ../selectedCategory @root.selectedCategory))
+                    (or (not (or ../selectedGroup @root.selectedGroup))
+                    (eq this.group (or ../selectedGroup @root.selectedGroup)))
+                    )}}
+                    <article class="card" data-group="{{group}}" data-cats='{{{json category}}}'>
+                        <img class="logo" src="{{icon}}" alt="{{name}} logo" />
+                        <div class="meta">
+                            <div class="name" title="{{name}}">
+                                {{name}}
+                                {{#if group}}<span class="tag">{{group}}</span>{{/if}}
+                            </div>
+                            <div class="dev" title="{{developerName}}">{{developerName}}</div>
+                        </div>
+                        <div class="right">
+                            <div class="downloads">{{formatNumber downCount}}</div>
+                            {{#if downCountDesc}}<div class="dev" style="font-size:11px">{{downCountDesc}}</div>{{/if}}
+                        </div>
+                    </article>
+                    {{/if}}
+                    {{/each}}
+                </div>
+                {{else}}
+                <div class="empty" id="empty-paid">Chưa có dữ liệu Paid.</div>
+                {{/if}}
+            </section>
+
+            {{!-- ======================= GROSSING ======================= --}}
+            <section class="col">
+                <h3>Top Grossing</h3>
+                {{#if grossingApps.length}}
+                <div class="list" id="list-grossing">
+                    {{#each grossingApps}}
+                    {{#if (and
+                    (inArray this.category (or ../selectedCategory @root.selectedCategory))
+                    (or (not (or ../selectedGroup @root.selectedGroup))
+                    (eq this.group (or ../selectedGroup @root.selectedGroup)))
+                    )}}
+                    <article class="card" data-group="{{group}}" data-cats='{{{json category}}}'>
+                        <img class="logo" src="{{icon}}" alt="{{name}} logo" />
+                        <div class="meta">
+                            <div class="name" title="{{name}}">
+                                {{name}}
+                                {{#if group}}<span class="tag">{{group}}</span>{{/if}}
+                            </div>
+                            <div class="dev" title="{{developerName}}">{{developerName}}</div>
+                        </div>
+                        <div class="right">
+                            <div class="downloads">{{formatNumber downCount}}</div>
+                            {{#if downCountDesc}}<div class="dev" style="font-size:11px">{{downCountDesc}}</div>{{/if}}
+                        </div>
+                    </article>
+                    {{/if}}
+                    {{/each}}
+                </div>
+                {{else}}
+                <div class="empty" id="empty-grossing">Chưa có dữ liệu Grossing.</div>
+                {{/if}}
+            </section>
+        </div>
+    </div>
+</body>
+
+<script>
+    (function () {
+        var selCat = document.getElementById('category');
+        var selGrp = document.getElementById('group');
+        var btnClear = document.getElementById('btnClear');
+
+        /* 🔹 Toggle panel & submit thêm app */
+        var btnAdd = document.getElementById('btnAdd');
+        var addPanel = document.getElementById('addPanel');
+        var btnAddSubmit = document.getElementById('btnAddSubmit');
+        var addMsg = document.getElementById('addMsg');
+        var inputUrl = document.getElementById('add_pkgName');
+        var inputCat = document.getElementById('add_category');
+        var inputGrp = document.getElementById('add_group');
+
+        var CREATE_ENDPOINT = '/api/apps'; // ⚠️ Thay bằng endpoint API của bạn nếu khác
+
+        function parseCats(el) {
+            try { return JSON.parse(el.getAttribute('data-cats') || '[]'); }
+            catch (e) { return []; }
+        }
+        function match(appEl, catVal, grpVal) {
+            var cats = parseCats(appEl);
+            var g = (appEl.getAttribute('data-group') || '').toLowerCase();
+            var catOk = !catVal || cats.map(function (x) { return String(x).toLowerCase(); }).includes(catVal.toLowerCase());
+            var grpOk = !grpVal || g === grpVal.toLowerCase();
+            return catOk && grpOk;
+        }
+        function applyFilter() {
+            var catVal = selCat.value || '';
+            var grpVal = selGrp.value || '';
+            ['free', 'paid', 'grossing'].forEach(function (bucket) {
+                var list = document.getElementById('list-' + bucket);
+                var empty = document.getElementById('empty-' + bucket);
+                if (!list) return;
+                var items = Array.prototype.slice.call(list.querySelectorAll('.card'));
+                var shown = 0;
+                items.forEach(function (it) {
+                    if (match(it, catVal, grpVal)) {
+                        it.classList.remove('hidden');
+                        shown++;
+                    } else {
+                        it.classList.add('hidden');
+                    }
+                });
+                if (empty) empty.style.display = shown ? 'none' : 'block';
+            });
+
+            // update query (no reload)
+            var params = new URLSearchParams(window.location.search);
+            if (catVal) params.set('category', catVal); else params.delete('category');
+            if (grpVal) params.set('group', grpVal); else params.delete('group');
+            var qs = params.toString();
+            window.history.replaceState({}, '', window.location.pathname + (qs ? ('?' + qs) : ''));
+        }
+
+        function toggleAddPanel() {
+            if (!addPanel) return;
+            var show = addPanel.style.display !== 'block';
+            addPanel.style.display = show ? 'block' : 'none';
+            if (show && inputUrl) inputUrl.focus();
+            if (addMsg) addMsg.textContent = '';
+        }
+
+        async function submitAdd() {
+            if (!inputUrl) return;
+            var pkgName = (inputUrl.value || '').trim();
+            var group = (inputGrp && inputGrp.value || '').trim();
+            var categoryRaw = (inputCat && inputCat.value || '').trim();
+            if (!pkgName) {
+                if (addMsg) { addMsg.textContent = 'Vui lòng nhập pkgName'; addMsg.style.color = 'var(--err)'; }
+                return;
+            }
+            var category = categoryRaw ? categoryRaw.split(',').map(function (s) { return s.trim(); }).filter(Boolean) : [];
+
+            try {
+                if (addMsg) { addMsg.textContent = 'Đang gửi...'; addMsg.style.color = 'var(--muted)'; }
+                var res = await fetch(CREATE_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pkgName, category, group })
+                });
+                var data = null;
+                try { data = await res.json(); } catch (e) { }
+
+                if (res.ok) {
+                    if (addMsg) { addMsg.textContent = 'Tạo app thành công!'; addMsg.style.color = 'var(--ok)'; }
+                    // tùy bạn: có thể reset form
+                    if (inputUrl) inputUrl.value = '';
+                    if (inputCat) inputCat.value = '';
+                    if (inputGrp) inputGrp.value = '';
+                    window.location.href = '/home';
+                } else {
+                    var msg = (data && (data.message || data.error)) || ('HTTP ' + res.status);
+                    if (addMsg) { addMsg.textContent = 'Lỗi: ' + msg; addMsg.style.color = 'var(--err)'; }
+                }
+            } catch (err) {
+                if (addMsg) { addMsg.textContent = 'Lỗi mạng hoặc CORS'; addMsg.style.color = 'var(--err)'; }
+            }
+        }
+
+        if (selCat) selCat.addEventListener('change', applyFilter);
+        if (selGrp) selGrp.addEventListener('change', applyFilter);
+        if (btnClear) btnClear.addEventListener('click', function () {
+            if (selCat) selCat.value = '';
+            if (selGrp) selGrp.value = '';
+            applyFilter();
+        });
+
+        if (btnAdd) btnAdd.addEventListener('click', toggleAddPanel);
+        if (btnAddSubmit) btnAddSubmit.addEventListener('click', submitAdd);
+
+        // init once
+        applyFilter();
+    })();
+</script>
+
+</html>
