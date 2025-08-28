@@ -28,6 +28,22 @@ export class AppTrackingService {
     ) {
     }
 
+    @Cron(CronExpression.EVERY_HOUR)
+    async updateAppInfo() {
+        try {
+            const app = await this.appTrackingModel.findOne({}).sort({ updatedAt: 1 }).lean()
+            if (!app || !app.pkgName) return;
+            const res = await this.getAppInfo(app.pkgName)
+            if (res && res.success) {
+                const { downCount, version, briefDes, name, icon, description, screenShots } = res.data || {};
+                console.log(downCount)
+                await this.appTrackingModel.findByIdAndUpdate(app._id, { $set: { downCount, version, briefDes, name, icon, description, screenShots } })
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     async addAppToTracking(body: { pkgName: string, group: string, category: string }) {
         try {
             const { pkgName, group, category } = { ...body }

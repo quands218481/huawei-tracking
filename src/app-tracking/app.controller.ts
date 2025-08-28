@@ -14,6 +14,12 @@ export class AppTrackingController {
     //     return this.appTrackingService.saveWFOtp(body)
     //   }
 
+
+    @Get()
+    test() {
+        // return this.appTrackingService.updateAppInfo()
+    }
+
     @Post('/api/apps')
     create(@Body() body: { pkgName: string, group: string, category: string }) {
         return this.appTrackingService.addAppToTracking(body);
