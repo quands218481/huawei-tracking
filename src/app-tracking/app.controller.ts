@@ -20,6 +20,13 @@ export class AppTrackingController {
         // return this.appTrackingService.updateAppInfo()
     }
 
+    @Render('detail')
+    @Get('detail')
+    async getDetailApp(@Query('pkgName') pkgName: string) {
+        return { appInfo: await this.appTrackingService.getDetailApp(pkgName) }
+    }
+
+
     @Post('/api/apps')
     create(@Body() body: { pkgName: string, group: string, category: string }) {
         return this.appTrackingService.addAppToTracking(body);

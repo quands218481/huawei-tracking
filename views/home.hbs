@@ -273,21 +273,24 @@
                     (or (not (or ../selectedGroup @root.selectedGroup))
                     (eq this.group (or ../selectedGroup @root.selectedGroup)))
                     )}}
-                    <article class="card" data-group="{{group}}" data-cats='{{{json category}}}'>
-                        <img class="logo" src="{{icon}}" alt="{{name}} logo" />
-                        <div class="meta">
-                            <div class="name" title="{{name}}">
-                                {{name}}
-                                {{#if group}}<span class="tag">{{group}}</span>{{/if}}
+                    <a class="card-link"
+                        href={{app_url}}
+                        target="_blank" rel="noopener" aria-label="Xem chi tiết {{name}}">
+                        <article class="card" data-group="{{group}}" data-cats='{{{json category}}}'>
+                            <img class="logo" src="{{icon}}" alt="{{name}} logo" />
+                            <div class="meta">
+                                <div class="name" title="{{name}}">
+                                    {{name}}
+                                    {{#if group}}<span class="tag">{{group}}</span>{{/if}}
+                                </div>
+                                <div class="dev" title="{{developerName}}">{{developerName}}</div>
                             </div>
-                            <div class="dev" title="{{developerName}}">{{developerName}}</div>
-                        </div>
-                        <div class="right">
-                            <div class="downloads">{{formatNumber downCount}}</div>
-                            <div class="downloads">Downloads</div>
-                            {{!-- {{#if downCountDesc}}<div class="dev" style="font-size:11px">{{downCountDesc}}</div>{{/if}} --}}
-                        </div>
-                    </article>
+                            <div class="right">
+                                <div class="downloads">{{formatNumber downCount}}</div>
+                                <div class="downloads">Downloads</div>
+                            </div>
+                        </article>
+                    </a>
                     {{/if}}
                     {{/each}}
                 </div>

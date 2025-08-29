@@ -1,0 +1,172 @@
+<!-- views/detail.hbs -->
+<section class="st-container">
+  {{#if appInfo}}
+    <!-- HEADER -->
+    <header class="st-hero">
+      <img class="st-icon" src="{{appInfo.icon}}" alt="{{appInfo.name}} icon" />
+      <div class="st-hero-meta">
+        <h1 class="st-name">{{appInfo.name}}</h1>
+        <div class="st-submeta">
+          {{#if appInfo.developerName}}<span class="st-badge">{{appInfo.developerName}}</span>{{/if}}
+          {{#if appInfo.version}}<span class="st-badge">v{{appInfo.version}}</span>{{/if}}
+          {{#if appInfo.pkgName}}<span class="st-badge mono">{{appInfo.pkgName}}</span>{{/if}}
+          {{#if appInfo.group}}<span class="st-badge ghost">{{appInfo.group}}</span>{{/if}}
+        </div>
+        {{#if appInfo.app_url}}
+          <a class="st-cta" href="{{appInfo.app_url}}" target="_blank" rel="noopener">Open in Store</a>
+        {{/if}}
+      </div>
+    </header>
+
+    <!-- KPI STRIP (ngang) -->
+    <section class="st-kpis">
+      <div class="st-card kpi">
+        <div class="kpi-label">Downloads</div>
+        <div class="kpi-value">
+          {{#if appInfo.downCount}}{{formatNumber appInfo.downCount}}{{else}}&lt; 5k{{/if}}
+        </div>
+        {{#if appInfo.downCountDesc}}<div class="kpi-desc">{{appInfo.downCountDesc}}</div>{{/if}}
+      </div>
+
+      <div class="st-card kpi">
+        <div class="kpi-label">Categories</div>
+        <div class="kpi-chips">
+          {{#each appInfo.category}}
+            <span class="chip">{{this}}</span>
+          {{else}}
+            <span class="chip ghost">—</span>
+          {{/each}}
+        </div>
+      </div>
+
+      <div class="st-card kpi">
+        <div class="kpi-label">Release Date</div>
+        <div class="kpi-value">{{formatDate appInfo.releaseDate}}</div>
+        <div class="kpi-desc">Worldwide</div>
+      </div>
+
+      <div class="st-card kpi">
+        <div class="kpi-label">Updated</div>
+        <div class="kpi-value">{{formatDate appInfo.updatedAt}}</div>
+        <div class="kpi-desc">Created: {{formatDate appInfo.createdAt}}</div>
+      </div>
+    </section>
+
+    <!-- BODY GRID -->
+    <section class="st-grid">
+      <!-- LEFT COLUMN -->
+      <div class="st-left">
+        {{#if appInfo.briefDes}}
+          <div class="st-card">
+            <h3 class="st-h3">Description (Short)</h3>
+            <p class="st-text">{{appInfo.briefDes}}</p>
+          </div>
+        {{/if}}
+
+        <div class="st-card">
+          <h3 class="st-h3">Description</h3>
+          <div class="st-text">{{{breaklines appInfo.description}}}</div>
+        </div>
+
+        {{#if appInfo.screenShots.length}}
+          <div class="st-card">
+            <h3 class="st-h3">Screenshots &amp; Media</h3>
+            <div class="st-shots">
+              {{#each appInfo.screenShots}}
+                <img src="{{this}}" alt="Screenshot {{inc @index}}" loading="lazy" />
+              {{/each}}
+            </div>
+          </div>
+        {{/if}}
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <aside class="st-right">
+        <div class="st-card sticky">
+          <h3 class="st-h3">Release Details</h3>
+          <dl class="st-def">
+            <dt>Current Version</dt>
+            <dd>{{#if appInfo.version}}v{{appInfo.version}}{{else}}—{{/if}}</dd>
+
+            <dt>Last Updated</dt>
+            <dd>{{formatDate appInfo.updatedAt}}</dd>
+
+            <dt>Worldwide Release Date</dt>
+            <dd>{{formatDate appInfo.releaseDate}}</dd>
+
+            <dt>Package</dt>
+            <dd class="mono">{{#if appInfo.pkgName}}{{appInfo.pkgName}}{{else}}—{{/if}}</dd>
+
+            <dt>Website / Store</dt>
+            <dd>
+              {{#if appInfo.app_url}}
+                <a href="{{appInfo.app_url}}" target="_blank" rel="noopener">Open in Store</a>
+              {{else}}—{{/if}}
+            </dd>
+
+            <dt>Categories</dt>
+            <dd>
+              {{#each appInfo.category}}
+                <span class="chip small">{{this}}</span>
+              {{else}}—{{/each}}
+            </dd>
+          </dl>
+        </div>
+      </aside>
+    </section>
+  {{else}}
+    <div class="st-empty st-card">Không tìm thấy ứng dụng.</div>
+  {{/if}}
+</section>
+
+<style>
+/* ====== Mini SensorTower-ish layout ====== */
+:root{
+  --bg:#0b1020;           /* nền tối xanh đen nhẹ */
+  --card:#11182c;         /* thẻ */
+  --muted:#8ea0c0;
+  --text:#e9eefc;
+  --line:rgba(255,255,255,.08);
+  --prim:#4ea1ff;
+  --ghost:#2a3550;
+}
+*{box-sizing:border-box}
+.st-container{max-width:1200px;margin:24px auto;padding:0 16px;color:var(--text);font:14px/1.5 Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+.mono{font-family: ui-monospace,SFMono-Regular,Menlo,monospace}
+.st-hero{display:flex;gap:16px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:16px}
+.st-icon{width:76px;height:76px;border-radius:16px;box-shadow:0 3px 12px rgba(0,0,0,.3);background:#fff;object-fit:cover}
+.st-name{font-size:22px;margin:0 0 6px}
+.st-submeta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.st-badge{background:var(--ghost);color:var(--text);padding:4px 8px;border-radius:999px;font-size:12px}
+.st-badge.ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.st-cta{display:inline-block;background:var(--prim);color:#001431;text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:600}
+.st-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+.st-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.kpi .kpi-label{color:var(--muted);font-size:12px;margin-bottom:6px}
+.kpi .kpi-value{font-size:20px;font-weight:700}
+.kpi .kpi-desc{color:var(--muted);font-size:12px;margin-top:2px}
+.kpi .kpi-chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--ghost);padding:4px 8px;border-radius:999px;font-size:12px}
+.chip.small{font-size:11px;padding:3px 7px}
+.chip.ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.st-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.st-h3{font-size:15px;margin:0 0 10px;border-bottom:1px dashed var(--line);padding-bottom:6px;color:#cfe1ff}
+.st-text{white-space:pre-wrap}
+.st-shots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.st-shots img{width:100%;height:240px;object-fit:cover;border-radius:10px;border:1px solid var(--line);background:#000}
+.st-def{display:grid;grid-template-columns:140px 1fr;gap:8px 10px;margin:0}
+.st-def dt{color:var(--muted)}
+.st-def dd{margin:0}
+.st-right .sticky{position:sticky;top:16px}
+.st-empty{text-align:center}
+@media (max-width: 1100px){
+  .st-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .st-shots{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width: 720px){
+  .st-grid{grid-template-columns:1fr}
+  .st-kpis{grid-template-columns:1fr 1fr}
+  .st-icon{width:64px;height:64px}
+}
+body{background:var(--bg)}
+</style>

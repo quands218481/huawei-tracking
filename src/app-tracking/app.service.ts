@@ -36,7 +36,7 @@ export class AppTrackingService {
             const res = await this.getAppInfo(app.pkgName)
             if (res && res.success) {
                 const { downCount, version, briefDes, name, icon, description, screenShots } = res.data || {};
-                console.log(downCount)
+                console.log(res.data.pkgName)
                 await this.appTrackingModel.findByIdAndUpdate(app._id, { $set: { downCount, version, briefDes, name, icon, description, screenShots } })
             }
         } catch (error) {
@@ -54,13 +54,21 @@ export class AppTrackingService {
                 const res = await this.getAppInfo(pkgName)
                 if (res && res.success) {
                     const { downCount, version, developerName, briefDes, name, icon, description, releaseDate, screenShots } = res.data || {};
-                    const app_url = `https://appgallery.huawei.com/app/detail?id=${pkgName}`
+                    const app_url = `https://appgallery.huawei.com/app/detail?id=${pkgName}&channelId=share`
                     await this.appTrackingModel.create({ pkgName, group, category, app_url, chartType: 'free', downCount, version, developerName, briefDes, name, icon, description, releaseDate, screenShots })
                     return { success: true }
                 } else {
                     return { success: false }
                 }
             }
+        } catch (error) {
+            return { success: false }
+        }
+    }
+
+    async getDetailApp(pkgName: string){
+        try {
+            return (await this.appTrackingModel.findOne({ pkgName }))
         } catch (error) {
             return { success: false }
         }
